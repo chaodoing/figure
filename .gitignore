@@ -4,6 +4,6 @@
 command
 test/*.xml
 .iris.yml
-.idea
+.idea/
 !/**/
 figure
