@@ -11,7 +11,6 @@ func generateKey(key []byte) (genKey []byte) {
 	// 初始化生成的 key，长度为 16，内容复制自原始 key 的前 16 个字节。
 	genKey = make([]byte, 16)
 	copy(genKey, key)
-	
 	// 遍历原始 key 的剩余部分，依次与生成的 key 的每个字节进行异或操作。
 	for i := 16; i < len(key); {
 		for j := 0; j < 16 && i < len(key); j, i = j+1, i+1 {
@@ -19,6 +18,18 @@ func generateKey(key []byte) (genKey []byte) {
 		}
 	}
 	return genKey
+}
+
+// Key 函数接收一个字符串类型的密钥，并返回其对应的字节切片类型的密钥。
+//
+// 参数:
+// key - 输入的字符串密钥。
+//
+// 返回值:
+// genKey - 生成的字节切片类型密钥。
+func Key(key string) (genKey string) {
+	// 调用 generateKey 函数，将字符串密钥转换为字节切片密钥
+	return string(generateKey([]byte(key)))
 }
 
 // pkcs5Padding 对密文进行 PKCS#5 填充。

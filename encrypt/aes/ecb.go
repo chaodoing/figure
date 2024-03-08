@@ -2,13 +2,17 @@ package aes
 
 import (
 	`crypto/aes`
+	`encoding/base64`
 )
 
 // EncryptECB 使用ECB模式对原始数据进行加密
 // origData: 需要加密的原始数据
 // key: 加密使用的密钥
 // 返回值: 加密后的数据
-func EncryptECB(origData []byte, key []byte) (encrypted []byte) {
+func EncryptECB(ciphertext, chars string) (value string) {
+	var encrypted []byte
+	origData := []byte(ciphertext)
+	key := []byte(chars)
 	// 使用提供的密钥生成AES加密器
 	cipher, _ := aes.NewCipher(generateKey(key))
 	// 计算加密后数据的长度
@@ -25,15 +29,17 @@ func EncryptECB(origData []byte, key []byte) (encrypted []byte) {
 	for bs, be := 0, cipher.BlockSize(); bs <= len(origData); bs, be = bs+cipher.BlockSize(), be+cipher.BlockSize() {
 		cipher.Encrypt(encrypted[bs:be], plain[bs:be])
 	}
-	
-	return encrypted
+	return base64.StdEncoding.EncodeToString(encrypted)
 }
 
 // DecryptECB 使用ECB模式解密数据
 // encrypted: 需要解密的密文
 // key: 解密使用的密钥
 // 返回值 decrypted: 解密后的明文
-func DecryptECB(encrypted []byte, key []byte) (decrypted []byte) {
+func DecryptECB(ciphertext, chars string) (value string) {
+	var decrypted []byte
+	encrypted, _ := base64.StdEncoding.DecodeString(ciphertext)
+	key := []byte(chars)
 	// 使用提供的密钥生成AES加密器
 	cipher, _ := aes.NewCipher(generateKey(key))
 	decrypted = make([]byte, len(encrypted))
@@ -49,5 +55,5 @@ func DecryptECB(encrypted []byte, key []byte) (decrypted []byte) {
 		trim = len(decrypted) - int(decrypted[len(decrypted)-1])
 	}
 	
-	return decrypted[:trim]
+	return string(decrypted[:trim])
 }

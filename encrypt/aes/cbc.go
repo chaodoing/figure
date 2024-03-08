@@ -3,13 +3,18 @@ package aes
 import (
 	`crypto/aes`
 	`crypto/cipher`
+	`encoding/base64`
 )
 
 // EncryptCBC 使用AES的CBC模式对原始数据进行加密
-// origData: 需要加密的原始数据
-// key: 用于加密的密钥
+// ciphertext: 需要加密的原始数据
+// chars: 用于加密的密钥
 // 返回值: 加密后的数据
-func EncryptCBC(origData []byte, key []byte) (encrypted []byte) {
+func EncryptCBC(ciphertext, chars string) (value string) {
+	var encrypted []byte
+	// ciphertext
+	origData := []byte(ciphertext)
+	key := []byte(chars)
 	// 创建AES加密器，要求密钥长度为16, 24或32字节
 	block, _ := aes.NewCipher(key)
 	blockSize := block.BlockSize() // 获取块大小
@@ -21,14 +26,17 @@ func EncryptCBC(origData []byte, key []byte) (encrypted []byte) {
 	encrypted = make([]byte, len(origData))
 	// 对数据进行加密
 	blockMode.CryptBlocks(encrypted, origData)
-	return encrypted
+	return base64.StdEncoding.EncodeToString(encrypted)
 }
 
 // DecryptCBC 使用AES-CBC模式解密数据
 // encrypted：被加密的数据字节切片
 // key：解密所需的秘钥字节切片
 // 返回值 decrypted：解密后的数据字节切片
-func DecryptCBC(encrypted []byte, key []byte) (decrypted []byte) {
+func DecryptCBC(ciphertext, chars string) (value string) {
+	var decrypted []byte
+	encrypted, _ := base64.StdEncoding.DecodeString(ciphertext)
+	key := []byte(chars)
 	// 创建AES分组加密器
 	block, _ := aes.NewCipher(key)
 	// 获取秘钥块的长度
@@ -41,5 +49,5 @@ func DecryptCBC(encrypted []byte, key []byte) (decrypted []byte) {
 	blockMode.CryptBlocks(decrypted, encrypted)
 	// 移除填充的补全码
 	decrypted = pkcs5UnPadding(decrypted)
-	return decrypted
+	return string(decrypted)
 }

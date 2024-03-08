@@ -4,6 +4,7 @@ import (
 	`crypto/aes`
 	`crypto/cipher`
 	`crypto/rand`
+	`encoding/base64`
 	`io`
 )
 
@@ -11,7 +12,10 @@ import (
 // origData: 需要加密的原始数据
 // key: 用于加密的密钥
 // 返回值: 加密后的数据
-func EncryptCFB(origData []byte, key []byte) (encrypted []byte) {
+func EncryptCFB(ciphertext, chars string) (value string) {
+	var encrypted []byte
+	origData := []byte(ciphertext)
+	key := []byte(chars)
 	// 使用密钥创建AES加密器
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -29,7 +33,7 @@ func EncryptCFB(origData []byte, key []byte) (encrypted []byte) {
 	stream := cipher.NewCFBEncrypter(block, iv)
 	// 使用加密器对原始数据进行XOR运算，加密原始数据
 	stream.XORKeyStream(encrypted[aes.BlockSize:], origData)
-	return encrypted // 返回加密后的数据
+	return base64.StdEncoding.EncodeToString(encrypted) // 返回加密后的数据
 }
 
 // DecryptCFB 使用AES的CFB模式解密密文
@@ -38,7 +42,9 @@ func EncryptCFB(origData []byte, key []byte) (encrypted []byte) {
 //   key []byte: 解密使用的密钥
 // 返回值：
 //   decrypted []byte: 解密后的明文
-func DecryptCFB(encrypted []byte, key []byte) (decrypted []byte) {
+func DecryptCFB(ciphertext, chars string) (value string) {
+	encrypted, _ := base64.StdEncoding.DecodeString(ciphertext)
+	key := []byte(chars)
 	// 使用密钥创建AES密码器
 	block, _ := aes.NewCipher(key)
 	// 检查密文长度是否足够
@@ -52,5 +58,5 @@ func DecryptCFB(encrypted []byte, key []byte) (decrypted []byte) {
 	stream := cipher.NewCFBDecrypter(block, iv)
 	// 使用解密器对密文进行解密
 	stream.XORKeyStream(encrypted, encrypted)
-	return encrypted
+	return string(encrypted)
 }
