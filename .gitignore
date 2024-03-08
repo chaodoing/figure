@@ -2,7 +2,7 @@
 .vscode
 .iris.yml
 command
-!/test/*.go
+test/*.xml
 .iris.yml
 .idea
 !/**/
