@@ -1,47 +1,54 @@
 package main
 
 import (
+	`os`
+	
+	`github.com/chaodoing/figure/app`
+	`github.com/chaodoing/figure/models`
+	`github.com/chaodoing/figure/o`
+	`github.com/gookit/goutil/envutil`
 	`github.com/kataras/iris/v12`
+	`github.com/kataras/iris/v12/hero`
+	`github.com/kataras/iris/v12/mvc`
 )
 
-// type Counter struct {
-// 	Service services.
-// }
-//
-// func (c *Counter) BeforeActivation(b mvc.BeforeActivation) {
-// 	b.Handle("GET", "/counter/{id:long}", "Editor")
-// }
-//
-// func (c *Counter) HandleHTTPError(ctx iris.Context) {
-// 	_ = ctx.JSON(iris.Map{
-// 		"error":   ctx.GetStatusCode(),
-// 		"message": "error",
-// 	})
-// }
-//
-// func (c *Counter) Editor(ctx iris.Context) mvc.View {
-// 	return mvc.View{
-// 		Name: "index.html",
-// 	}
-// }
-//
-// func (c *Counter) Get(ctx iris.Context) iris.Map {
-// 	value := c.Service.Increment()
-// 	return iris.Map{
-// 		"value": value,
-// 	}
-// }
+func index(ctx iris.Context, global app.Global) {
+	db, err := global.Db()
+	if err != nil {
+		o.O(ctx, o.Data{Code: 3306, Message: err.Error()})
+		return
+	}
+	var data []models.Admin
+	err = db.Find(&data).Error
+	if err != nil {
+		o.O(ctx, o.Data{Code: 1, Message: err.Error()})
+		return
+	}
+	o.O(ctx, o.Data{Code: 0, Message: `success`, Data: data})
+	return
+}
+
+var (
+	ENV     = "development"
+	APP     = "figure"
+	VERSION = "v1.0.0"
+)
 
 func main() {
-	app := iris.Default()
-	app.Any(`/`, func(ctx iris.Context) {
-		_ = ctx.JSON(iris.Map{
-			"error":   0,
-			"message": "OK",
-		})
+	envutil.SetEnvMap(map[string]string{
+		"DIR":     envutil.Getenv("DIR", os.ExpandEnv("${PWD}")),
+		"ENV":     envutil.Getenv("ENV", ENV),
+		"APP":     envutil.Getenv("APP", APP),
+		"VERSION": envutil.Getenv("VERSION", VERSION),
 	})
-	err := app.Listen(":8080")
+	boot, err := app.New("./config/app.xml", false, nil)
 	if err != nil {
 		panic(err)
 	}
+	
+	boot.Handle(func(app *iris.Application) {
+		app.Get(`/index`, hero.Handler(index))
+	}).Mvc(func(app *mvc.Application) {
+		app.Party("/api").Handle(new(Controller)).Name = "api"
+	}).Run(iris.DefaultConfiguration())
 }

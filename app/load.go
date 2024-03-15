@@ -7,7 +7,7 @@ import (
 )
 
 // XML 加载配置文件
-func XML(env string) (data *Global, err error) {
+func XML(env string, event EventInterface) (data Global, err error) {
 	var content []byte
 	content, err = os.ReadFile(os.ExpandEnv(env))
 	if err != nil {
@@ -17,15 +17,12 @@ func XML(env string) (data *Global, err error) {
 	if err != nil {
 		return
 	}
-	c := data.LoadEnv()
-	if c != nil {
-		data = c
-	}
+	data = data.LoadEnv(event)
 	return
 }
 
 // JSON 加载配置文件
-func JSON(env string) (data *Global, err error) {
+func JSON(env string, event EventInterface) (data Global, err error) {
 	var content []byte
 	content, err = os.ReadFile(os.ExpandEnv(env))
 	if err != nil {
@@ -35,9 +32,6 @@ func JSON(env string) (data *Global, err error) {
 	if err != nil {
 		return
 	}
-	c := data.LoadEnv()
-	if c != nil {
-		data = c
-	}
+	data = data.LoadEnv(event)
 	return
 }

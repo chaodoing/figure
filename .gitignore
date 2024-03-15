@@ -7,3 +7,9 @@ test/*.xml
 .idea/
 !/**/
 figure
+.env.yml
+.env
+logs/
+config/
+/config.yml
+/models/

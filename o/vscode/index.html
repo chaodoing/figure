@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+	<meta charset="UTF-8">
+	<title>{{.Title}}</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<style>
+        body {
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        #code {
+            width: 100vw;
+            height: 100vh;
+        }
+	</style>
+</head>
+<body>
+<div id="code"></div>
+</body>
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/layui/2.8.17/css/layui.min.css">
+<script src="https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.43.0/min/vs/loader.min.js"></script>
+<script>
+	let sampleJson = JSON.parse({{.Json}});
+	let theme = {{.Theme}};
+	let data = JSON.stringify(sampleJson, null, "\t");
+    require.config({ paths: { vs: 'https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.43.0/min/vs/' }, 'vs/nls': { availableLanguages: { '*': 'zh-cn' } } });
+    window.MonacoEnvironment = {
+        getWorkerUrl(workerId, label) {
+            return `data:text/javascript;charset=utf-8,${encodeURIComponent(`self.MonacoEnvironment = {baseUrl: 'https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.43.0/min'};importScripts('https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.43.0/min/vs/base/worker/workerMain.min.js');`)}`;
+        },
+    };
+    require(['vs/editor/editor.main'], function () {
+        let editor = window.monaco.editor.create(document.querySelector("#code"), {
+            value: data,
+            language: 'json',
+            theme: theme,
+			fontSize: '14px',
+            lineNumbers: 'on',
+            roundedSelection: false,
+            scrollBeyondLastLine: false,
+            readOnly: false,
+            tabSize: 4,
+	        automaticLayout: true,
+            minimap: {
+                enabled: false
+            },
+            scrollbar: {
+                verticalScrollbarSize: 14,
+                horizontalScrollbarSize: 14,
+                horizontal: 'auto',
+                useShadows: true,
+                verticalHasArrows: false,
+                horizontalHasArrows: false,
+                alwaysConsumeMouseWheel: false
+            },
+            contextmenu: {
+                enabled: false
+            },
+            overviewRulerBorder: false,
+            cursorBlinking: 'solid',
+        });
+	    window.addEventListener('resize', event => {
+		    editor.layout()
+	    })
+    });
+</script>
+</html>
